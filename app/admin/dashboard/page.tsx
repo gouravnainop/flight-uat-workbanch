@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
-import { Plane, Zap, Code2, Settings, LogOut, Activity, Layers, FlaskConical } from 'lucide-react'
+import Link from 'next/link'
+import { Plane, Zap, Code2, Settings, LogOut, Activity, Layers, FlaskConical, Wrench, ArrowRight, Sparkles } from 'lucide-react'
 import type { Metadata } from 'next'
 import { getSession } from '@/app/lib/session'
 import { logoutAction } from '@/app/actions/auth'
@@ -31,15 +32,17 @@ interface SectionCard {
   title: string
   description: string
   icon: React.ComponentType<{ size?: number; className?: string }>
+  href?: string
+  badge?: string
 }
 
 // ── Data ───────────────────────────────────────────────────────────────────────
 
 const stats: StatCard[] = [
-  { label: 'API Endpoints',    value: '—',   note: 'Coming soon',     icon: Zap         },
-  { label: 'Bookable Sectors', value: '—',   note: 'Coming soon',     icon: Plane       },
-  { label: 'Active Sessions',  value: '1',   note: 'Current session', icon: Activity    },
-  { label: 'Environment',      value: 'UAT', note: 'Non-production',  icon: FlaskConical },
+  { label: 'Integration Workbench', value: 'Active', note: 'Flow runner ready',  icon: Wrench      },
+  { label: 'API Endpoints',         value: '—',      note: 'Coming soon',        icon: Zap         },
+  { label: 'Bookable Sectors',      value: '—',      note: 'Coming soon',        icon: Plane       },
+  { label: 'Environment',           value: 'UAT',    note: 'Non-production',     icon: FlaskConical },
 ]
 
 const sections: SectionCard[] = [
@@ -47,21 +50,25 @@ const sections: SectionCard[] = [
     title:       'Flight Inventory',
     description: 'View all available UAT sectors, routes, and schedule data.',
     icon:        Plane,
+    badge:       'Soon',
   },
   {
     title:       'API Explorer',
     description: 'Browse endpoints, generate cURL commands, and test live.',
     icon:        Zap,
+    badge:       'Soon',
   },
   {
     title:       'TypeScript Models',
     description: 'Browse auto-generated TS interfaces and Zod schemas.',
     icon:        Code2,
+    badge:       'Soon',
   },
   {
     title:       'Admin Settings',
     description: 'Manage admin users, API keys, and environment config.',
     icon:        Settings,
+    badge:       'Soon',
   },
 ]
 
@@ -81,21 +88,31 @@ export default async function AdminDashboardPage() {
 
         {/* Brand */}
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-lg bg-[--color-surface-200] border border-[--color-border-default] flex items-center justify-center">
-            <Plane size={13} className="text-[--color-brand-400]" strokeWidth={2.2} />
-          </div>
-          <span className="text-sm font-semibold tracking-tight">
-            FDCircle{' '}
-            <span className="text-[--color-text-muted] font-normal">UAT</span>
-          </span>
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="w-7 h-7 rounded-lg bg-[--color-surface-200] border border-[--color-border-default] flex items-center justify-center">
+              <Plane size={13} className="text-[--color-brand-400]" strokeWidth={2.2} />
+            </div>
+            <span className="text-sm font-semibold tracking-tight">
+              FDCircle{' '}
+              <span className="text-[--color-text-muted] font-normal">UAT</span>
+            </span>
+          </Link>
           <Badge variant="brand" className="text-[10px] tracking-widest uppercase">
             Admin
           </Badge>
         </div>
 
-        {/* User + Logout */}
+        {/* User + Workbench Shortcut + Logout */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
+          <Link
+            href="/integrate"
+            className="flex items-center gap-1.5 text-xs text-[--color-brand-400] hover:text-[--color-brand-300] bg-[--color-brand-500]/10 hover:bg-[--color-brand-500]/20 px-3 py-1.5 rounded-lg font-medium transition-all"
+          >
+            <Wrench size={13} />
+            Launch Workbench
+          </Link>
+
+          <div className="flex items-center gap-2 pl-2 border-l border-[--color-border-subtle]">
             <div className="w-7 h-7 rounded-full bg-[--color-surface-300] border border-[--color-border-default] flex items-center justify-center text-xs font-semibold text-[--color-text-secondary]">
               {initials}
             </div>
@@ -119,16 +136,49 @@ export default async function AdminDashboardPage() {
       </header>
 
       {/* ── Main ── */}
-      <main className="flex-1 px-6 py-10 max-w-5xl w-full mx-auto space-y-10">
+      <main className="flex-1 px-6 py-10 max-w-5xl w-full mx-auto space-y-8">
 
         {/* Page heading */}
         <div>
-          <h1 className="text-2xl font-bold tracking-[-0.02em]">Dashboard</h1>
+          <h1 className="text-2xl font-bold tracking-[-0.02em]">Admin Dashboard</h1>
           <p className="text-sm text-[--color-text-secondary] mt-1">
             Welcome back,{' '}
             <span className="text-[--color-text-primary] font-medium">{session.email}</span>
           </p>
         </div>
+
+        {/* ── Featured Tool Banner: Integration Workbench ── */}
+        <Link
+          href="/integrate"
+          className="group block p-6 rounded-2xl border border-[--color-brand-500]/30 bg-gradient-to-r from-[--color-brand-500]/10 via-[--color-surface-100] to-[--color-surface-100] hover:border-[--color-brand-500] hover:shadow-lg transition-all"
+        >
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-[--color-brand-500]/20 border border-[--color-brand-500]/30 flex items-center justify-center shrink-0">
+                <Wrench size={22} className="text-[--color-brand-400]" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base font-semibold text-[--color-text-primary] group-hover:text-[--color-brand-300] transition-colors">
+                    Integration Workbench
+                  </h2>
+                  <Badge variant="success" className="text-[10px]">
+                    <Sparkles size={9} />
+                    Admin Active
+                  </Badge>
+                </div>
+                <p className="text-xs text-[--color-text-secondary] max-w-xl leading-relaxed">
+                  Run multi-step provider flight search and booking flows, configure payload mappings, inspect responses, and test live integration adapters.
+                </p>
+              </div>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-[--color-brand-400] group-hover:translate-x-1 transition-transform">
+              Open Tool
+              <ArrowRight size={14} />
+            </div>
+          </div>
+        </Link>
 
         {/* ── Stats ── */}
         <section aria-labelledby="stats-heading">
@@ -152,10 +202,10 @@ export default async function AdminDashboardPage() {
         {/* ── Sections ── */}
         <section aria-labelledby="sections-heading">
           <h2 id="sections-heading" className="text-sm font-semibold text-[--color-text-secondary] mb-3">
-            Sections
+            Platform Modules
           </h2>
           <div className="grid sm:grid-cols-2 gap-3">
-            {sections.map(({ title, description, icon: Icon }) => (
+            {sections.map(({ title, description, icon: Icon, badge }) => (
               <Card
                 key={title}
                 className="p-5 flex gap-4 transition-colors hover:border-[--color-border-strong] hover:bg-[--color-surface-200] cursor-default"
@@ -166,7 +216,7 @@ export default async function AdminDashboardPage() {
                 <div className="space-y-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium text-[--color-text-primary]">{title}</p>
-                    <Badge variant="default" className="text-[10px]">Soon</Badge>
+                    {badge && <Badge variant="default" className="text-[10px]">{badge}</Badge>}
                   </div>
                   <p className="text-xs text-[--color-text-muted] leading-relaxed">{description}</p>
                 </div>
@@ -213,3 +263,4 @@ export default async function AdminDashboardPage() {
     </div>
   )
 }
+

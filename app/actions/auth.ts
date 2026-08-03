@@ -25,6 +25,7 @@ export async function loginAction(
 ): Promise<LoginState> {
   const email = (formData.get('email') as string | null)?.trim() ?? ''
   const password = (formData.get('password') as string | null) ?? ''
+  const from = (formData.get('from') as string | null)?.trim() ?? ''
 
   // Basic field presence check
   if (!email || !password) {
@@ -49,7 +50,7 @@ export async function loginAction(
   if (!isValid) {
     // Intentionally vague to prevent user enumeration
     return {
-      error: 'Invalid credentials. Please try again.',
+      error: 'Invalid credentials. Please check your email and password.',
       fields: { email },
     }
   }
@@ -57,8 +58,9 @@ export async function loginAction(
   // Create JWT session cookie
   await createSession(email, 'admin')
 
-  // Redirect must be called outside try/catch (it throws internally)
-  redirect('/admin/dashboard')
+  // Destination redirect
+  const destination = from && from.startsWith('/') && !from.startsWith('//') ? from : '/integrate'
+  redirect(destination)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -69,3 +71,5 @@ export async function logoutAction(): Promise<void> {
   await deleteSession()
   redirect('/admin/login')
 }
+
+

@@ -6,12 +6,13 @@ import { decrypt } from '@/app/lib/session'
 // Route definitions
 // ─────────────────────────────────────────────────────────────────────────────
 
-const ADMIN_LOGIN_PATH = '/admin/login'
-const ADMIN_ROOT       = '/admin'
-const UAT_ROOT         = '/uat'
+const ADMIN_LOGIN_PATH  = '/admin/login'
+const ADMIN_ROOT        = '/admin'
+const UAT_ROOT          = '/uat'
+const INTEGRATE_ROOT    = '/integrate'
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Proxy (replaces deprecated middleware.ts in Next.js 16)
+// Proxy (Next.js request guard)
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function proxy(request: NextRequest) {
@@ -31,18 +32,36 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // ── Guard: /admin/* requires a valid admin session ─────────────────────────
+  // ── Guard: /integrate/* requires a valid admin session ─────────────────────
+  if (pathname.startsWith(INTEGRATE_ROOT)) {
+    const token = request.cookies.get('fdcircle_session')?.value
+    const session = await decrypt(token)
+
+    if (!session || session.role !== 'admin') {
+      const loginUrl = new URL(ADMIN_LOGIN_PATH, request.nextUrl)
+      loginUrl.searchParams.set('from', pathname)
+      return NextResponse.redirect(loginUrl)
+    }
+
+    return NextResponse.next()
+  }
+
+  // ── Guard: /admin/* ────────────────────────────────────────────────────────
   if (!pathname.startsWith(ADMIN_ROOT)) {
     return NextResponse.next()
   }
 
-  // The admin login page itself is always public
-  if (pathname === ADMIN_LOGIN_PATH || pathname.startsWith(`${ADMIN_LOGIN_PATH}/`)) {
+  // The admin login page is public (redirect if already logged in)
+  const isLoginPage =
+    pathname === ADMIN_LOGIN_PATH ||
+    pathname.startsWith(`${ADMIN_LOGIN_PATH}/`)
+
+  if (isLoginPage) {
     const token = request.cookies.get('fdcircle_session')?.value
     const session = await decrypt(token)
 
     if (session?.role === 'admin') {
-      return NextResponse.redirect(new URL('/admin/dashboard', request.nextUrl))
+      return NextResponse.redirect(new URL('/integrate', request.nextUrl))
     }
 
     return NextResponse.next()
@@ -65,3 +84,4 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 }
+

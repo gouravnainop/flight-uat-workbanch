@@ -1,13 +1,16 @@
 'use client'
 
 import { useActionState } from 'react'
-import { LogIn } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
+import { LogIn, ShieldCheck } from 'lucide-react'
 import { loginAction, type LoginState } from '@/app/actions/auth'
 import { Button, Input, Alert } from '@/app/components/ui'
 
-// ── Component ──────────────────────────────────────────────────────────────────
-
 export default function LoginForm() {
+  const searchParams = useSearchParams()
+  const from = searchParams.get('from') ?? ''
+  const isFromIntegrate = from.startsWith('/integrate')
+
   const [state, action, isPending] = useActionState<LoginState, FormData>(
     loginAction,
     undefined,
@@ -15,16 +18,26 @@ export default function LoginForm() {
 
   return (
     <form action={action} noValidate className="space-y-4">
+      {/* Notice if redirected from protected route */}
+      {isFromIntegrate && (
+        <Alert variant="info">
+          <ShieldCheck size={14} />
+          Admin authorization required to access the Integration Workbench.
+        </Alert>
+      )}
 
       {/* Global error */}
       {state?.error && (
         <Alert variant="error">{state.error}</Alert>
       )}
 
+      {/* Destination hidden field */}
+      {from && <input type="hidden" name="from" value={from} />}
+
       <Input
         name="email"
         type="email"
-        label="Email address"
+        label="Admin Email"
         autoComplete="email"
         spellCheck={false}
         required
@@ -48,14 +61,15 @@ export default function LoginForm() {
         id="login-submit"
         type="submit"
         fullWidth
-        size="lg"
+        size="md"
         isLoading={isPending}
         loadingText="Signing in…"
         className="mt-1"
       >
         <LogIn size={15} />
-        Sign in
+        Sign in to Workbench
       </Button>
     </form>
   )
 }
+

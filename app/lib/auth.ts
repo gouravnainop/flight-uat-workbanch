@@ -4,7 +4,7 @@ import 'server-only'
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
 
-type AdminUser = {
+export type AdminUser = {
   email: string
   password: string // bcrypt hash
 }
@@ -13,7 +13,7 @@ type AdminUser = {
 // Parse admin users from environment variable
 // ─────────────────────────────────────────────────────────────────────────────
 
-function getAdminUsers(): AdminUser[] {
+export function getAdminUsers(): AdminUser[] {
   const raw = process.env.ADMIN_CREDENTIALS
   if (!raw) {
     console.warn('[Auth] ADMIN_CREDENTIALS env var is not set. No admins will be able to log in.')
@@ -30,9 +30,8 @@ function getAdminUsers(): AdminUser[] {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Validate admin credentials
-// Uses a constant-time string comparison for the bcrypt hash.
-// We dynamically import bcryptjs to keep it out of the Edge bundle if needed.
+// Validate admin credentials for Login
+// Uses constant-time bcrypt compare.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function validateAdminCredentials(
@@ -43,11 +42,11 @@ export async function validateAdminCredentials(
   const admin = admins.find(
     (a) => a.email.toLowerCase() === email.toLowerCase().trim(),
   )
-
   if (!admin) return false
 
   // Lazy-import bcryptjs — pure JS, no native bindings, works in Node.js runtime
   const bcrypt = await import('bcryptjs')
-  const isValid = await bcrypt.compare(password, admin.password)
-  return isValid
+  return bcrypt.compare(password, admin.password)
 }
+
+

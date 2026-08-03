@@ -170,7 +170,7 @@ export interface Sectors {
         enums: ['oneWay', 'roundTrip']
       }
     ],
-    responseBodyType: `export interface Root {
+    responseBodyType: `export interface FDCircleOnwardDate {
   success: boolean
   data: Data
 }
@@ -354,6 +354,10 @@ export interface StopDaum {
         example: '2022-01-01'
       }
     ],
+    notes: [
+      'Used To View the Latest Prices for a Particular Inventory',
+      'Can be Used to Fetch the Seat Availability Before Booking'
+    ],
     responseBodyType: `export interface FDCircleRepriceResponse {
   success: boolean
   data: Data
@@ -415,7 +419,7 @@ export interface Data {
         }
       ]
     },
-    requestBodyType: `export interface Root {
+    requestBodyType: `export interface FDCircleBookingRequest {
   invId: string
   adult: number
   child: number
@@ -455,6 +459,224 @@ export interface Passenger {
   nationality?: string
   guardian?: string
 }`,
+    responseBodyType: `export interface FDCircleBookingResponse {
+  success: boolean
+  data: Data  
+}
+
+export interface Data {
+  referenceId: string
+}
+`,
+    notes: [
+      'Used To Create Bookings'
+    ]
+  },
+  {
+    category: 'Get Bookings',
+    description: 'This will return the booking details for the reference id.',
+    id: 'get-booking',
+    method: 'GET',
+    name: 'Get Booking Details',
+    path: '/booking_details',
+    requiresAuth: true,
+    notes: [
+      'Can be used to see the status of the tickets',
+      'Shows the generated PNR here'
+    ],
+    queryParams: [
+      {
+        name: 'referenceId',
+        description: 'reference ID from Booking',
+        required: true,
+        type: 'string',
+        example: 'TFG29'
+      }
+    ],
+    responseBodyType: `export interface FDCircleBookingDetail {
+  success: boolean
+  data: Data
+}
+
+export interface Data {
+  referenceId: string
+  saleData: SaleData
+}
+
+export interface SaleData {
+  onwardDate: string
+  adult: number
+  child: number
+  infant: number
+  bookerName: string
+  bookerEmail: string
+  bookerPhone: string
+  totalPassengers: number
+  totalBooking: number
+  totalBookingPrice: number
+  totalAmt: number
+  lastUpdatedAt: string
+  bookingDate: string
+  bookingTime: string
+  onwardFlight: OnwardFlight
+  returnFlight?: ReturnFlight
+  stopData?: StopDaum[]
+  baggage: Baggage
+  passengers: Passenger[]
+}
+
+export interface OnwardFlight {
+  onwardDate: string
+  departureTime: string
+  arrivalDate: string
+  arrivalTime: string
+  flightNumber: string
+  airportCode: string
+  pnr: string
+  flightType: string
+  sourceCode: string
+  sourceName: string
+  sourceCountry: string
+  destinationCode: string
+  destinationName: string
+  destinationCountry: string
+}
+
+export interface ReturnFlight {
+  departureDate: string
+  departureTime: string
+  sector: string
+  arrivalDate: string
+  arrivalTime: string
+  flightNumber: string
+  returnStopData?: ReturnStopDaum[]
+}
+
+export interface ReturnStopDaum {
+  arrivalTime: string
+  sector: string
+  portId: string
+  arrivalDate: string
+  departureTime: string
+  departureDate: string
+}
+
+export interface StopDaum {
+  arrivalTime: string
+  sector: string
+  arrivalDate: string
+  departureTime: string
+  departureDate: string
+  stopCode: string
+}
+
+export interface Baggage {
+  cabinBaggageWeightAdult: number
+  cabinBaggageWeightChild: number
+  cabinBaggageWeightInfant: number
+  checkInBaggageWeightAdult: number
+  checkInBaggageWeightChild: number
+}
+
+export interface Passenger {
+  travelerType: string
+  title: string
+  firstName: string
+  lastName: string
+  dob: string
+  nationality: string
+  passportNumber: string
+  wheelChair: string
+  issueDate: string
+  expDate: string
+  totalAmt: number
+  status: string
+  guardian?: string
+}`
+  },
+  {
+    category: 'Search',
+    description: 'It returns all the available date for the sector',
+    id: 'get-all-dates',
+    method: 'GET',
+    name: 'Get All Dates',
+    path: '/getAllDates',
+    requiresAuth: true,
+    notes: [
+      'Can be Used to Create Flight Calenders',
+      'This Api Includes the Minimun & Maximum Prices Also'
+    ],
+    queryParams: [
+      {
+        description: 'IATA airport/city code Ex: DEL',
+        name: 'sourceCode',
+        required: true,
+        type: 'string',
+        example: 'DEL'
+      },
+      {
+        description: 'IATA airport/city code Ex: BOM',
+        name: 'destinationCode',
+        required: true,
+        type: 'string',
+        example: 'BOM'
+      },
+      {
+        description: 'Type of Trip',
+        name: 'tripType',
+        required: false,
+        type: 'enum',
+        enums: [
+          'oneWay',
+          'roundTrip'
+        ],
+        example: 'oneWay'
+      }
+    ],
+    responseBodyType: `export interface FDCircleAllDates {
+  success: boolean
+  data: Data
+}
+
+export interface Data {
+  sourceCode: string
+  destinationCode: string
+  availableDates: AvailableDate[]
+}
+
+export interface AvailableDate {
+  travelDate: string
+  totalAvailableQuantity: number
+  minSellingFare: number
+  maxSellingFare: number
+  minInfantCharges: number
+  maxInfantCharges: number
+}
+`
+  },
+  {
+    category: 'Search',
+    description: 'It returns the available sectors for booking which have live inventories',
+    id: 'get-available-sectors',
+    method: 'GET',
+    name: 'Get Available Sectors',
+    path: '/available_flights',
+    requiresAuth: true,
+    notes: [
+      'Can Be Used To Find All Bookable Sectors',
+      'One Return Sectors Which have available inventories'
+    ],
+    responseBodyType: `export interface FDCircleAvailableSectors {
+  success: boolean
+  data: AvailableSector[]
+}
+
+export interface AvailableSector {
+  sectorName: string
+  sourceCode: string
+  destinationCode: string
+}
+`
   }
 ]
 

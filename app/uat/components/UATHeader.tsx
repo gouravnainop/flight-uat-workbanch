@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Plane, PanelLeftOpen, PanelLeftClose, LogOut, KeyRound, CheckCircle2 } from 'lucide-react'
+import { Plane, PanelLeftOpen, PanelLeftClose, LogOut, KeyRound, CheckCircle2, CodeXml, Wrench } from 'lucide-react'
 import { deauthorizeClientAction } from '@/app/actions/client-auth'
 import { Button, Badge } from '@/app/components/ui'
 
@@ -33,7 +33,7 @@ export default function UATHeader({ sidebarOpen, onToggleSidebar, apiKey }: UATH
 
         <Link href="/" className="flex items-center gap-2 group">
           <div className="w-6 h-6 rounded-md bg-[--color-surface-200] border border-[--color-border-default] flex items-center justify-center">
-            <Plane size={12} className="text-[--color-brand-400]" strokeWidth={2.2} />
+            <CodeXml size={12} className="text-[--color-brand-400]" strokeWidth={2.2} />
           </div>
           <span className="text-xs font-semibold text-[--color-text-primary] group-hover:text-[--color-text-secondary] transition-colors">
             FDCircle <span className="text-[--color-text-muted] font-normal">UAT</span>
